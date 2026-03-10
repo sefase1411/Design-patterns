@@ -1,0 +1,92 @@
+@startuml
+title Ejercicio 1 - Plataforma de Comercio Electrónico
+
+interface PaymentStrategy {
+  +pay(amount: double)
+}
+
+class CreditCardPayment
+class PayPalPayment
+
+PaymentStrategy <|.. CreditCardPayment
+PaymentStrategy <|.. PayPalPayment
+
+class PaymentFactory {
+  +createPayment(type: String): PaymentStrategy
+}
+
+interface ShippingStrategy {
+  +calculateCost(): double
+  +getType(): String
+}
+
+class StandardShipping
+class ExpressShipping
+
+ShippingStrategy <|.. StandardShipping
+ShippingStrategy <|.. ExpressShipping
+
+class ShippingFactory {
+  +createShipping(type: String): ShippingStrategy
+}
+
+interface OrderComponent {
+  +getTotal(): double
+}
+
+class BaseOrder {
+  -basePrice: double
+  +getTotal(): double
+}
+
+abstract class OrderDecorator {
+  #order: OrderComponent
+}
+
+class PercentageDiscountDecorator {
+  -percentage: double
+  +getTotal(): double
+}
+
+class CouponDecorator {
+  -couponValue: double
+  +getTotal(): double
+}
+
+OrderComponent <|.. BaseOrder
+OrderComponent <|.. OrderDecorator
+OrderComponent <|.. PercentageDiscountDecorator
+OrderComponent <|.. CouponDecorator
+
+OrderDecorator o-- OrderComponent
+PercentageDiscountDecorator --|> OrderDecorator
+CouponDecorator --|> OrderDecorator
+
+interface NotificationObserver {
+  +update(message: String)
+}
+
+class EmailNotifier
+class SMSNotifier
+
+NotificationObserver <|.. EmailNotifier
+NotificationObserver <|.. SMSNotifier
+
+class Order {
+  -orderComponent: OrderComponent
+  -paymentStrategy: PaymentStrategy
+  -shippingStrategy: ShippingStrategy
+  -observers: List<NotificationObserver>
+  +addObserver(observer: NotificationObserver)
+  +notifyObservers(message: String)
+  +checkout()
+}
+
+Order --> OrderComponent
+Order --> PaymentStrategy
+Order --> ShippingStrategy
+Order --> NotificationObserver
+PaymentFactory ..> PaymentStrategy
+ShippingFactory ..> ShippingStrategy
+
+@enduml

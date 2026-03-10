@@ -1,0 +1,75 @@
+@startuml
+title Ejercicio 6 - Sistema de Reservas para Aerolínea
+
+class ReservationBuilder {
+  -passenger: String
+  -flight: String
+  -seat: String
+  -basePrice: double
+  +setPassenger(passenger: String): ReservationBuilder
+  +setFlight(flight: String): ReservationBuilder
+  +setSeat(seat: String): ReservationBuilder
+  +setBasePrice(basePrice: double): ReservationBuilder
+  +build(): Reservation
+}
+
+interface PricingStrategy {
+  +calculate(basePrice: double): double
+}
+
+class EconomyPricing
+class PremiumPricing
+
+PricingStrategy <|.. EconomyPricing
+PricingStrategy <|.. PremiumPricing
+
+interface ReservationState {
+  +confirm(reservation: Reservation)
+  +cancel(reservation: Reservation)
+  +getName(): String
+}
+
+class PendingState
+class ConfirmedState
+class CancelledState
+
+ReservationState <|.. PendingState
+ReservationState <|.. ConfirmedState
+ReservationState <|.. CancelledState
+
+interface ReservationObserver {
+  +update(message: String)
+}
+
+class EmailNotifier
+class SMSNotifier
+class AppNotifier
+
+ReservationObserver <|.. EmailNotifier
+ReservationObserver <|.. SMSNotifier
+ReservationObserver <|.. AppNotifier
+
+class Reservation {
+  -passenger: String
+  -flight: String
+  -seat: String
+  -basePrice: double
+  -pricingStrategy: PricingStrategy
+  -state: ReservationState
+  -observers: List<ReservationObserver>
+  +setPricingStrategy(strategy: PricingStrategy)
+  +calculatePrice(): double
+  +addObserver(observer: ReservationObserver)
+  +notifyObservers(message: String)
+  +confirm()
+  +cancel()
+  +setState(state: ReservationState)
+  +getState(): ReservationState
+}
+
+ReservationBuilder --> Reservation
+Reservation --> PricingStrategy
+Reservation --> ReservationState
+Reservation --> ReservationObserver
+
+@enduml

@@ -1,0 +1,58 @@
+@startuml
+title Ejercicio 2 - Sistema de Monitoreo de Microservicios
+
+class MonitoringConfig {
+  -instance: MonitoringConfig
+  -cpuThreshold: double
+  -MonitoringConfig()
+  +getInstance(): MonitoringConfig
+  +getCpuThreshold(): double
+}
+
+interface MetricProvider {
+  +getCpuUsage(serviceName: String): double
+}
+
+class LegacyMonitoringAPI {
+  +cpu_usage_percent(serviceName: String): double
+}
+
+class MonitoringAdapter {
+  -legacyAPI: LegacyMonitoringAPI
+  +getCpuUsage(serviceName: String): double
+}
+
+MetricProvider <|.. MonitoringAdapter
+MonitoringAdapter --> LegacyMonitoringAPI
+
+interface AlertObserver {
+  +update(message: String)
+}
+
+class EmailAlert
+class SlackAlert
+
+AlertObserver <|.. EmailAlert
+AlertObserver <|.. SlackAlert
+
+class MicroserviceMonitor {
+  -metricProvider: MetricProvider
+  -observers: List<AlertObserver>
+  +addObserver(observer: AlertObserver)
+  +checkService(serviceName: String)
+  -notifyObservers(message: String)
+}
+
+MicroserviceMonitor --> MetricProvider
+MicroserviceMonitor --> AlertObserver
+MicroserviceMonitor ..> MonitoringConfig
+
+class MonitoringFacade {
+  -monitor: MicroserviceMonitor
+  +addObserver(observer: AlertObserver)
+  +monitorService(serviceName: String)
+}
+
+MonitoringFacade --> MicroserviceMonitor
+
+@enduml
